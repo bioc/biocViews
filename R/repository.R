@@ -148,7 +148,7 @@ write_VIEWS <- function(reposRootPath, fields = NULL,
     ## by parsing the .tar.gz files
     pkg.dir <- file.path(reposRootPath, reposInfo[, "source"])
     db <- tools:::.build_repository_package_db(pkg.dir, fields, type, verbose)
-    dbMat <- do.call("rbind", db)
+    dbMat <- do.call(rbind, db)
 
     ## Integrate version and archive file path info for the different contrib
     ## paths in this repos.  We duplicate the source path info here, but that
@@ -203,25 +203,32 @@ write_VIEWS <- function(reposRootPath, fields = NULL,
 
 writeRepositoryHtml <- function(reposRoot, title, reposUrl="..",
                                 viewUrl="../..", reposFullUrl=reposUrl,
-                                link.rel=TRUE) {
+                                downloadStatsUrl="", devHistoryUrl="",
+                                link.rel=TRUE, backgroundColor="transparent") {
     ## Writes package description html under reposRoot/html and an index.html
     ## file under reposRoot.
     ##
     ## Links created in the package description html will use reposUrl as
     ## prefix.
-    pkgList <- loadPackageDetails(reposRoot, reposUrl, viewUrl, reposFullUrl)
-    writePackageDetailHtml(pkgList, file.path(reposRoot, "html"))
+    pkgList <- loadPackageDetails(reposRoot, reposUrl, viewUrl, reposFullUrl,
+                                  downloadStatsUrl, devHistoryUrl)
+    writePackageDetailHtml(pkgList, file.path(reposRoot, "html"),
+                           backgroundColor=backgroundColor)
     writeRepositoryIndexHtml(pkgList, reposRoot, title, link.rel=link.rel)
 
     ## copy the css stylesheet
     cssName <- "repository-detail.css"
-    cssPath <- system.file(file.path("css", cssName), package="biocViews")
-    res <- try(file.copy(cssPath, file.path(reposRoot, cssName),
-                         overwrite=TRUE), silent=TRUE)
+    cssPath <- system.file(file.path("css", paste(cssName, ".in", sep="")),
+                           package="biocViews")
+    res <- try(copySubstitute(cssPath, file.path(reposRoot, cssName),
+                        symbolValues=list("BACKGROUND_COLOR"=backgroundColor)),
+               silent=TRUE)
+    res
 }
 
 
-writePackageDetailHtml <- function(pkgList, htmlDir="html") {
+writePackageDetailHtml <- function(pkgList, htmlDir="html",
+                                   backgroundColor="transparent") {
     if (!file.exists(htmlDir))
       dir.create(htmlDir)
     for (pkg in pkgList) {
@@ -231,10 +238,12 @@ writePackageDetailHtml <- function(pkgList, htmlDir="html") {
     }
     ## copy the package detail css stylesheet
     cssName <- "package-detail.css"
-    cssPath <- system.file(file.path("css", cssName), package="biocViews")
-    res <- try(file.copy(cssPath, file.path(htmlDir, cssName),
-                         overwrite=TRUE), silent=TRUE)
-
+    cssPath <- system.file(file.path("css", paste(cssName, ".in", sep="")),
+                           package="biocViews")
+    res <- try(copySubstitute(cssPath, file.path(htmlDir, cssName),
+                        symbolValues=list("BACKGROUND_COLOR"=backgroundColor)),
+               silent=TRUE)
+    res
 }
 
 
