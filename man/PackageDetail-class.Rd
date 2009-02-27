@@ -39,8 +39,8 @@ Objects can be created by calls of the form \code{new("PackageDetail", ...)}.
     \item{\code{Maintainer}:}{Object of class \code{"character"} see
       DESCRIPTION }
     \item{\code{Depends}:}{Object of class \code{"character"} see DESCRIPTION }
-    \item{\code{Suggests}:}{Object of class \code{"character"} see DESCRIPTION }
     \item{\code{Imports}:}{Object of class \code{"character"} see DESCRIPTION }
+    \item{\code{Suggests}:}{Object of class \code{"character"} see DESCRIPTION }
     \item{\code{SystemRequirements}:}{Object of class \code{"character"}
       see DESCRIPTION }
     \item{\code{License}:}{Object of class \code{"character"} see DESCRIPTION }
@@ -57,10 +57,14 @@ Objects can be created by calls of the form \code{new("PackageDetail", ...)}.
     version string for the OS X Tiger binary package }
     \item{\code{mac.binary.leopard.ver}:}{Object of class \code{"character"}
     version string for the OS X Leopard binary package }
+    \item{\code{downloadStatsUrl}:}{Object of class \code{"character"} An
+    optional URL for the download history statistics. }
     \item{\code{manuals}:}{Object of class \code{"character"} Not used.
     Intended to hold paths to pdf manuals in the repository}
     \item{\code{dependsOnMe}:}{Object of class \code{"character"} giving
     packages found in the repository that depend on this package}
+    \item{\code{importsMe}:}{Object of class \code{"character"} giving
+    packages found in the repository that imports this package}
     \item{\code{suggestsMe}:}{Object of class \code{"character"} giving
     packages found in the repository that suggest this package}
     \item{\code{functionIndex}:}{Object of class \code{"character"} Not
@@ -71,6 +75,8 @@ Objects can be created by calls of the form \code{new("PackageDetail", ...)}.
     for the root of the repository. }
     \item{\code{viewRoot}:}{Object of class \code{"character"} The URL
     for the view of the repository. }
+    \item{\code{devHistoryUrl}:}{Object of class \code{"character"} The URL
+    for the development changelog. }
   }
 }
 \section{Extends}{
@@ -107,7 +113,7 @@ Class \code{"Htmlized"}, directly.
   
 }
 
-\author{ Seth Falcon}
+\author{Seth Falcon}
 
 \examples{
 pd <- new("PackageDetail",
@@ -127,7 +133,9 @@ pd <- new("PackageDetail",
           win.binary.ver="bin/windows/contrib/2.3/MyFancyPackge_1.2.2.zip",
           mac.binary.universal.ver="bin/macosx/universal/contrib/2.3/MyFancyPackge_1.2.3.tgz",
           mac.binary.leopard.ver="bin/macosx/leopard/contrib/2.3/MyFancyPackge_1.2.3.tgz",
-          dependsOnMe=c("AnEvenFancierPackage","AMuchFancierPackage"),
+          dependsOnMe=c("PackageThatExposesMe"),
+          importsMe=c("AnEvenFancierPackage","AMuchFancierPackage"),
+          suggestsMe="PackageThatUsesMeInVignette",
           reposRoot="http://foo.bar.org")
 
 html <- htmlValue(pd)

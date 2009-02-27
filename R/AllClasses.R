@@ -12,8 +12,8 @@ setClass("PackageDetail", contains="Htmlized",
                         "Author"="character",
                         "Maintainer"="character",
                         "Depends"="character",
-                        "Suggests"="character",
                         "Imports"="character",
+                        "Suggests"="character",
                         "SystemRequirements"="character",
                         "License"="character",
                         "URL"="character",
@@ -23,13 +23,16 @@ setClass("PackageDetail", contains="Htmlized",
                         "win.binary.ver"="character",
                         "mac.binary.universal.ver"="character",
                         "mac.binary.leopard.ver"="character",
+                        "downloadStatsUrl"="character",
                         "manuals"="character",
                         "dependsOnMe"="character",
+                        "importsMe"="character",
                         "suggestsMe"="character",
                         "functionIndex"="character",
                         "reposFullUrl"="character",
                         "reposRoot"="character",
-                        "viewRoot"="character"))
+                        "viewRoot"="character",
+                        "devHistoryUrl"="character"))
 
 ## Define a subclass of PackageDetail for each "chunk" of the object
 ## that we want to be able to render to HTML separately.

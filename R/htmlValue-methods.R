@@ -145,6 +145,16 @@ setMethod("htmlValue", signature(object="pdDownloadInfo"),
               }
               fileLinks <- lapply(names(fileTypes), makeLinkHelper)
               names(fileLinks) <- fileTypes
+              downloadStatsUrl <- slot(object, "downloadStatsUrl")
+              if ((length(downloadStatsUrl) == 1) && 
+                  (nchar(downloadStatsUrl) > 0)) {
+                  fileLinks <- c(fileLinks,
+                                 list("Package Downloads Report" =
+                                      xmlNode("a", "Downloads Stats",
+                                              attrs=c(href=paste(downloadStatsUrl, "/",
+                                                                 slot(object, "Package"),
+                                                                 ".html", sep="")))))
+              }
               domValue <- tableHelper(fileLinks,
                                       table.attrs=list(class="downloads"))
               domValue
@@ -198,7 +208,7 @@ setMethod("htmlValue", signature(object="pdDetailsInfo"),
                       args[seq(2, 2*(length(nodes) - 1), by = 2)] <- list(", ")
                   }
                   args <- c(list(name = "div"), args, list(attrs = c(class=class)))
-                  return(do.call("xmlNode", args))
+                  return(do.call(xmlNode, args))
               }
               buildViewLinks <- function(x) buildLinks(x, object@viewRoot, class="views")
               buildPkgLinks <- function(x)
@@ -213,18 +223,24 @@ setMethod("htmlValue", signature(object="pdDetailsInfo"),
               }
 
               ## create list elements for fields
-              flds <- c("biocViews", "Depends", "Suggests", "Imports",
-                        "SystemRequirements", "License", "URL", "dependsOnMe",
-                        "suggestsMe")
+              flds <- c("biocViews"="biocViews", "Depends"="Depends",
+                        "Imports"="Imports", "Suggests"="Suggests",
+                        "System Requirements"="SystemRequirements",
+                        "License"="License", "URL"="URL",
+                        "Depends On Me"="dependsOnMe",
+                        "Imports Me"="importsMe",
+                        "Suggests Me"="suggestsMe",
+                        "Development History"="devHistoryUrl")
               tableDat <- vector("list", length = length(flds))
               names(tableDat) <- flds
 
               ## add biocViews info
               tableDat[["biocViews"]] <- buildViewLinks(object@biocViews)
 
-              ## add Depends, Suggests, Imports, dependsOnMe, suggestsMe info
+              ## add Depends, Imports, Suggests, dependsOnMe, importsMe, suggestsMe
               pkgFlds <-
-                c("Depends", "Suggests", "Imports", "dependsOnMe", "suggestsMe")
+                c("Depends", "Imports", "Suggests",
+                  "dependsOnMe", "importsMe", "suggestsMe")
               tableDat[pkgFlds] <-
                 lapply(pkgFlds, function(x) buildPkgLinks(slot(object, x)))
 
@@ -235,7 +251,23 @@ setMethod("htmlValue", signature(object="pdDetailsInfo"),
 
               ## add URL info
               tableDat[["URL"]] <- buildURLLink(object@URL)
-              
+
+              ## add development history
+              devHistoryUrl <- object@devHistoryUrl
+              if ((length(devHistoryUrl) == 1) && 
+                  (nchar(devHistoryUrl) > 0)) {
+                  tableDat[["devHistoryUrl"]] <-
+                    xmlNode("a", "Bioconductor Changelog",
+                            attrs=c(href=paste(devHistoryUrl, "/",
+                                               object@Package, sep="")))
+              } else {
+                  flds <- flds[- match("devHistoryUrl", flds)]
+                  tableDat[["devHistoryUrl"]] <- NULL
+              }
+
+              ## rename rows
+              names(tableDat) <- names(flds)
+
               domValue <- tableHelper(tableDat,
                                       table.attrs=list(class="details"))
               domValue

@@ -1,4 +1,5 @@
-loadPackageDetails <- function(reposRoot, reposUrl="..", viewUrl="../..", reposFullUrl=reposUrl)
+loadPackageDetails <- function(reposRoot, reposUrl="..", viewUrl="../..", reposFullUrl=reposUrl,
+                               downloadStatsUrl="", devHistoryUrl="")
 {
     ## Return a list of PackageDetail objects representing
     ## the packages contained in the repository located
@@ -10,18 +11,23 @@ loadPackageDetails <- function(reposRoot, reposUrl="..", viewUrl="../..", reposF
     ## FIXME: should allow reading VIEWS from a URL also.
     viewsFile <- file.path(reposRoot, "VIEWS")
     pkgMat <- read.dcf(viewsFile)
-    createPackageDetailList(pkgMat, reposUrl, viewUrl, reposFullUrl)
+    createPackageDetailList(pkgMat, reposUrl, viewUrl, reposFullUrl, downloadStatsUrl,
+                            devHistoryUrl)
 }
 
 
 createPackageDetailList <- function(viewMat, reposUrl="..",
                                     viewUrl=character(0),
-                                    reposFullUrl=reposUrl)
+                                    reposFullUrl=reposUrl,
+                                    downloadStatsUrl="",
+                                    devHistoryUrl="")
 {
     pkgList <- apply(viewMat, 1, viewRowToPackageDetail)
     names(pkgList) <- viewMat[, "Package"]
-    pkgList <- setDependsOnMeSuggestsMe(pkgList)
+    pkgList <- setDependsOnMeImportsMeSuggestsMe(pkgList)
     pkgList <- lapply(pkgList, function(p) {
+        p@devHistoryUrl <- devHistoryUrl
+        p@downloadStatsUrl <- downloadStatsUrl
         p@reposFullUrl <- reposFullUrl
         p@reposRoot <- reposUrl
         p@viewRoot <- viewUrl
@@ -31,29 +37,37 @@ createPackageDetailList <- function(viewMat, reposUrl="..",
 }
 
 
-setDependsOnMeSuggestsMe <- function(pkgDetailsList) {
+setDependsOnMeImportsMeSuggestsMe <- function(pkgDetailsList) {
     ## Add list of packages that depend on and suggest each package
     ## listed in pkgDetailsList, a list of PackageDetail objects.
 
     pkgNames <- names(pkgDetailsList)
+
     depCols <- lapply(pkgDetailsList,
-                         function(x) pkgNames %in% x@Depends)
-    depMat <- do.call("cbind", depCols)
+                      function(x) pkgNames %in% x@Depends)
+    depMat <- do.call(cbind, depCols)
     colnames(depMat) <- rownames(depMat) <- pkgNames
 
+    impCols <- lapply(pkgDetailsList,
+                      function(x) pkgNames %in% x@Imports)
+    impMat <- do.call(cbind, impCols)
+    colnames(impMat) <- rownames(impMat) <- pkgNames
+
     sugCols <- lapply(pkgDetailsList,
-                         function(x) pkgNames %in% x@Suggests)
-    sugMat <- do.call("cbind", sugCols)
+                      function(x) pkgNames %in% x@Suggests)
+    sugMat <- do.call(cbind, sugCols)
     colnames(sugMat) <- rownames(sugMat) <- pkgNames
-    
-    setDepsSugs <- function(pkg) {
+
+    setDepsImpsSugs <- function(pkg) {
         deps <- pkgNames[which(depMat[pkg@Package, ])]
+        imps <- pkgNames[which(impMat[pkg@Package, ])]
         sugs <- pkgNames[which(sugMat[pkg@Package, ])]
         pkg@dependsOnMe <- deps
+        pkg@importsMe <- imps
         pkg@suggestsMe <- sugs
         return(pkg)
     }
-    return(lapply(pkgDetailsList, setDepsSugs))
+    return(lapply(pkgDetailsList, setDepsImpsSugs))
 }
 
 
