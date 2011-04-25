@@ -287,10 +287,9 @@ write_VIEWS <- function(reposRootPath, fields = NULL,
 }
 
 
-writeRFilesFromVignettes <- function(reposRoot, title, reposUrl="..",
+writeRFilesFromVignettes <- function(reposRoot, reposUrl="..",
                                 viewUrl="../..", reposFullUrl=reposUrl,
-                                downloadStatsUrl="", devHistoryUrl="",
-                                link.rel=TRUE, backgroundColor="transparent") {
+                                downloadStatsUrl="", devHistoryUrl="") {
 
     pkgList <- loadPackageDetails(reposRoot, reposUrl, viewUrl, reposFullUrl,
           downloadStatsUrl, devHistoryUrl)
