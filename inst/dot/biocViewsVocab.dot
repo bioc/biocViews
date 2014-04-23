@@ -294,6 +294,7 @@ PackageType -> probe;
 PackageType -> SIFT;
 PackageType -> SNPlocs;
 PackageType -> TranscriptDb;
+PackageType -> MeSHDb;
 
 
 
